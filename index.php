@@ -1,15 +1,17 @@
 <?php
-<?php
 // Start de sessie zodat we gebruikersgegevens kunnen opslaan
 session_start();
 
-// Include de benodigde classes
+// Include de database configuratie
+require_once 'config.php';
+
+// Include de benodigde classes (let op de hoofdletters in de bestandsnamen)
 require_once 'classes/Gebruiker.php';
 require_once 'classes/Profiel.php';
 require_once 'classes/Asiel.php';
-require_once 'classes/Dier.php';
-require_once 'classes/Swipe.php';
-require_once 'classes/Match.php';
+require_once 'classes/Dier.php'; // Let op: kleine letter in bestandsnaam
+require_once 'classes/Swipe.php'; // Let op: kleine letter in bestandsnaam
+require_once 'classes/Match.php'; // Let op: kleine letter in bestandsnaam
 require_once 'classes/Bericht.php';
 
 // Controleer of de gebruiker is ingelogd

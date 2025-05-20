@@ -37,7 +37,7 @@ class Gebruiker {
 
     public function registreren(): bool {
         // Verbinding met de database
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         if ($conn->connect_error) {
             die("Verbinding mislukt: " . $conn->connect_error);
@@ -76,7 +76,7 @@ class Gebruiker {
 
     public function inloggen(string $email, string $wachtwoord): bool {
         // Verbinding met de database
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         if ($conn->connect_error) {
             die("Verbinding mislukt: " . $conn->connect_error);
@@ -117,7 +117,7 @@ class Gebruiker {
     }
 
     private function laadProfiel(): void {
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         $stmt = $conn->prepare("SELECT id, bio, foto, voorkeuren FROM profielen WHERE gebruiker_id = ?");
         $stmt->bind_param("i", $this->id);

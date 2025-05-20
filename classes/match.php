@@ -2,7 +2,7 @@
 require_once 'Gebruiker.php';
 require_once 'Dier.php';
 
-class Match {
+class DierMatch { // Changed from Match to DierMatch
     private int $id;
     private Gebruiker $gebruiker;
     private Dier $dier;
@@ -24,7 +24,7 @@ class Match {
         $this->dier = $dier;
         
         // Voeg de match toe aan de database
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+         $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         if ($conn->connect_error) {
             die("Verbinding mislukt: " . $conn->connect_error);
@@ -48,7 +48,7 @@ class Match {
     
     public static function getMatchesVoorGebruiker(Gebruiker $gebruiker): array {
         $matches = [];
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         if ($conn->connect_error) {
             die("Verbinding mislukt: " . $conn->connect_error);
@@ -67,7 +67,7 @@ class Match {
         $result = $stmt->get_result();
         
         while ($row = $result->fetch_assoc()) {
-            $match = new Match();
+            $match = new DierMatch();
             $match->id = $row["id"];
             
             $match->gebruiker = $gebruiker;

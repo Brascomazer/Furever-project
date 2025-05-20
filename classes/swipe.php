@@ -1,6 +1,7 @@
 <?php
 require_once 'Gebruiker.php';
 require_once 'Dier.php';
+require_once 'match.php'; // Make sure to include this file
 
 class Swipe {
     private int $id;
@@ -47,7 +48,7 @@ class Swipe {
         $this->richting = $richting;
         
         // Toevoegen aan de database
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         if ($conn->connect_error) {
             die("Verbinding mislukt: " . $conn->connect_error);
@@ -77,7 +78,7 @@ class Swipe {
     private function controlerenOpMatch(int $gebruikerId, int $dierId): void {
         // Een match ontstaat als het asiel ook interesse heeft getoond in de gebruiker
         // Dit is een vereenvoudigde implementatie waarbij we altijd een match maken als een gebruiker een dier liked
-        $match = new Match();
+        $match = new DierMatch(); // Changed from Match to DierMatch
         
         // Simuleer dat er altijd een match is
         $gebruiker = new Gebruiker();
