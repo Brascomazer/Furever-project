@@ -67,7 +67,7 @@ class Bericht {
 
     public static function ontvangen(Gebruiker $gebruiker, Asiel $asiel): array {
         $berichten = [];
-        $conn = new mysqli("localhost", "gebruikersnaam", "wachtwoord", "furever_db");
+        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
         
         if ($conn->connect_error) {
             die("Verbinding mislukt: " . $conn->connect_error);
