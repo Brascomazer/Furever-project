@@ -17,6 +17,21 @@ require_once 'classes/Bericht.php';
 // Controleer of de gebruiker is ingelogd
 $isIngelogd = isset($_SESSION['gebruiker_id']);
 
+// BELANGRIJKE FIX: Initialiseer $gebruiker als gebruiker is ingelogd
+if ($isIngelogd) {
+    $gebruiker = new Gebruiker();
+    $gebruiker->inloggen($_SESSION['gebruiker_email'], ''); // Laad gebruiker zonder wachtwoordcontrole
+}
+
+// Controleer of er een melding is in de URL
+if (isset($_GET['melding'])) {
+    $melding = $_GET['melding'];
+}
+
+if (isset($_GET['foutmelding'])) {
+    $foutmelding = $_GET['foutmelding'];
+}
+
 // Verwerk formulier verzoeken
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['actie'])) {
@@ -25,9 +40,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Nieuwe gebruiker registreren
                 $gebruiker = new Gebruiker($_POST['naam'], $_POST['email'], $_POST['wachtwoord']);
                 if ($gebruiker->registreren()) {
-                    $melding = "Registratie succesvol. U kunt nu inloggen.";
+                    header("Location: index.php?melding=" . urlencode("Registratie succesvol. U kunt nu inloggen."));
+                    exit;
                 } else {
-                    $foutmelding = "Registratie mislukt. Probeer het opnieuw.";
+                    header("Location: index.php?foutmelding=" . urlencode("Registratie mislukt. Probeer het opnieuw."));
+                    exit;
                 }
                 break;
                 
@@ -35,9 +52,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Gebruiker inloggen
                 $gebruiker = new Gebruiker();
                 if ($gebruiker->inloggen($_POST['email'], $_POST['wachtwoord'])) {
-                    $melding = "U bent succesvol ingelogd.";
+                    header("Location: index.php");
+                    exit;
                 } else {
-                    $foutmelding = "Inloggen mislukt. Controleer uw e-mail en wachtwoord.";
+                    header("Location: index.php?foutmelding=" . urlencode("Inloggen mislukt. Controleer uw e-mail en wachtwoord."));
+                    exit;
                 }
                 break;
                 
@@ -45,7 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Gebruiker uitloggen
                 $gebruiker = new Gebruiker();
                 $gebruiker->uitloggen();
-                $melding = "U bent uitgelogd.";
+                header("Location: index.php?melding=" . urlencode("U bent uitgelogd."));
+                exit;
                 break;
                 
             case 'profielbewerken':
@@ -58,9 +78,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     // Bewerk het profiel
                     $profiel = $gebruiker->getProfiel();
                     if ($profiel->bewerken($_POST['bio'], $_POST['foto'], $_POST['voorkeuren'])) {
-                        $melding = "Profiel succesvol bijgewerkt.";
+                        header("Location: index.php?melding=" . urlencode("Profiel succesvol bijgewerkt."));
+                        exit;
                     } else {
-                        $foutmelding = "Profiel bijwerken mislukt.";
+                        header("Location: index.php?foutmelding=" . urlencode("Profiel bijwerken mislukt."));
+                        exit;
                     }
                 }
                 break;
@@ -77,12 +99,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $swipe = new Swipe();
                     if ($swipe->toevoegenSwipe($gebruiker, $dier, $_POST['richting'])) {
                         if ($_POST['richting'] === Swipe::LIKE) {
-                            $melding = "Je hebt dit dier geliked!";
+                            header("Location: index.php?melding=" . urlencode("Je hebt dit dier geliked!"));
                         } else {
-                            $melding = "Je hebt dit dier niet geliked.";
+                            header("Location: index.php?melding=" . urlencode("Je hebt dit dier niet geliked."));
                         }
+                        exit;
                     } else {
-                        $foutmelding = "Swipe kon niet worden toegevoegd.";
+                        header("Location: index.php?foutmelding=" . urlencode("Swipe kon niet worden toegevoegd."));
+                        exit;
                     }
                 }
                 break;
@@ -129,17 +153,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 <div class="form-group">
                     <label for="bio">Over mij:</label>
-                    <textarea id="bio" name="bio" rows="4"></textarea>
+                    <textarea id="bio" name="bio" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getBio()); ?></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label for="foto">Profielfoto URL:</label>
-                    <input type="text" id="foto" name="foto">
+                    <input type="text" id="foto" name="foto" value="<?php echo htmlspecialchars($gebruiker->getProfiel()->getFoto()); ?>">
                 </div>
                 
                 <div class="form-group">
                     <label for="voorkeuren">Voorkeuren voor huisdieren:</label>
-                    <textarea id="voorkeuren" name="voorkeuren" rows="4"></textarea>
+                    <textarea id="voorkeuren" name="voorkeuren" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getVoorkeuren()); ?></textarea>
                 </div>
                 
                 <button type="submit">Profiel Bijwerken</button>
