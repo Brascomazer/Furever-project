@@ -9,9 +9,9 @@ require_once 'config.php';
 require_once 'classes/Gebruiker.php';
 require_once 'classes/profiel.php';
 require_once 'classes/Asiel.php';
-require_once 'classes/dier.php'; // Let op: kleine letter in bestandsnaam
-require_once 'classes/swipe.php'; // Let op: kleine letter in bestandsnaam
-require_once 'classes/match.php'; // Let op: kleine letter in bestandsnaam
+require_once 'classes/dier.php'; 
+require_once 'classes/swipe.php'; 
+require_once 'classes/match.php'; 
 require_once 'classes/Bericht.php';
 
 // Controleer of de gebruiker is ingelogd
