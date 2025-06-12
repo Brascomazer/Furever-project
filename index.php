@@ -86,32 +86,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 }
                 break;
-                
-            case 'swipe':
-                // Een swipe registreren
-                if ($isIngelogd) {
-                    $gebruiker = new Gebruiker();
-                    $gebruiker->inloggen($_SESSION['gebruiker_email'], '');
-                    
-                    $dier = new Dier();
-                    $dier->setId($_POST['dier_id']);
-                    
-                    $swipe = new Swipe();
-                    if ($swipe->toevoegenSwipe($gebruiker, $dier, $_POST['richting'])) {
-                        if ($_POST['richting'] === Swipe::LIKE) {
-                            header("Location: index.php?melding=" . urlencode("Je hebt dit dier geliked!"));
-                        } else {
-                            header("Location: index.php?melding=" . urlencode("Je hebt dit dier niet geliked."));
-                        }
-                        exit;
-                    } else {
-                        header("Location: index.php?foutmelding=" . urlencode("Swipe kon niet worden toegevoegd."));
-                        exit;
-                    }
-                }
-                break;
         }
     }
+}
+
+// Haal de matches op voor de ingelogde gebruiker
+$matches = [];
+if ($isIngelogd) {
+    $matches = DierMatch::getMatchesVoorGebruiker($gebruiker);
 }
 ?>
 
@@ -127,6 +109,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <header>
         <h1>Furever</h1>
         <p>Vind jouw perfecte dierenmatch!</p>
+        <?php if ($isIngelogd): ?>
+        <nav>
+            <a href="index.php" class="active">Home</a>
+            <a href="swipe.php">Swipe</a>
+        </nav>
+        <?php endif; ?>
     </header>
 
     <div class="container">
@@ -140,56 +128,74 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         <?php if ($isIngelogd): ?>
             <!-- Ingelogde gebruiker interface -->
-            <h2>Welkom, <?php echo $_SESSION['gebruiker_naam']; ?>!</h2>
+            <div class="dashboard">
+                <div class="profile-section">
+                    <h2>Welkom, <?php echo $_SESSION['gebruiker_naam']; ?>!</h2>
+                    
+                    <form method="post" action="" class="logout-form">
+                        <input type="hidden" name="actie" value="uitloggen">
+                        <button type="submit">Uitloggen</button>
+                    </form>
+                    
+                    <h3>Jouw Profiel</h3>
+                    <form method="post" action="" class="profile-form">
+                        <input type="hidden" name="actie" value="profielbewerken">
+                        
+                        <div class="form-group">
+                            <label for="bio">Over mij:</label>
+                            <textarea id="bio" name="bio" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getBio()); ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="foto">Profielfoto URL:</label>
+                            <input type="text" id="foto" name="foto" value="<?php echo htmlspecialchars($gebruiker->getProfiel()->getFoto()); ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="voorkeuren">Voorkeuren voor huisdieren:</label>
+                            <textarea id="voorkeuren" name="voorkeuren" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getVoorkeuren()); ?></textarea>
+                        </div>
+                        
+                        <button type="submit">Profiel Bijwerken</button>
+                    </form>
+                </div>
+                
+                <div class="matches-section">
+                    <h3>Jouw Matches</h3>
+                    <?php if (count($matches) > 0): ?>
+                        <div class="matches-container">
+                        <?php foreach ($matches as $match): ?>
+                            <div class="match-card">
+                                <div class="match-header">
+                                    <h4><?php echo htmlspecialchars($match->getDier()->getNaam()); ?></h4>
+                                </div>
+                                <div class="match-details">
+                                    <p><strong>Soort:</strong> <?php echo htmlspecialchars($match->getDier()->getSoort()); ?></p>
+                                    <p><strong>Ras:</strong> <?php echo htmlspecialchars($match->getDier()->getRas()); ?></p>
+                                    <p><strong>Asiel:</strong> <?php echo htmlspecialchars($match->getDier()->getAsiel()->getNaam()); ?></p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p>Je hebt nog geen matches. Ga naar de <a href="swipe.php">swipe pagina</a> om dieren te ontdekken!</p>
+                    <?php endif; ?>
+                </div>
+            </div>
             
-            <form method="post" action="">
-                <input type="hidden" name="actie" value="uitloggen">
-                <button type="submit">Uitloggen</button>
-            </form>
-            
-            <h3>Jouw Profiel</h3>
-            <form method="post" action="">
-                <input type="hidden" name="actie" value="profielbewerken">
-                
-                <div class="form-group">
-                    <label for="bio">Over mij:</label>
-                    <textarea id="bio" name="bio" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getBio()); ?></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="foto">Profielfoto URL:</label>
-                    <input type="text" id="foto" name="foto" value="<?php echo htmlspecialchars($gebruiker->getProfiel()->getFoto()); ?>">
-                </div>
-                
-                <div class="form-group">
-                    <label for="voorkeuren">Voorkeuren voor huisdieren:</label>
-                    <textarea id="voorkeuren" name="voorkeuren" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getVoorkeuren()); ?></textarea>
-                </div>
-                
-                <button type="submit">Profiel Bijwerken</button>
-            </form>
-            
-            <h3>Dieren om te ontdekken</h3>
-            <div class="animal-card">
-                <img src="https://via.placeholder.com/400x200?text=Schattige+Hond" alt="Hond" class="animal-img">
-                <div class="animal-info">
-                    <h3>Max</h3>
-                    <p><strong>Soort:</strong> Hond</p>
-                    <p><strong>Ras:</strong> Golden Retriever</p>
-                    <p><strong>Leeftijd:</strong> 3 jaar</p>
-                    <p><strong>Asiel:</strong> Dierenhuis Amsterdam</p>
-                    <p>Max is een vrolijke hond die graag speelt. Hij is goed met kinderen en andere honden.</p>
-                </div>
-                <form method="post" action="" class="swipe-buttons">
-                    <input type="hidden" name="actie" value="swipe">
-                    <input type="hidden" name="dier_id" value="1">
-                    <button type="submit" name="richting" value="DISLIKE" class="swipe-button dislike">Niet mijn type</button>
-                    <button type="submit" name="richting" value="LIKE" class="swipe-button like">Like!</button>
-                </form>
+            <div class="cta-card">
+                <h3>Ontdek Meer Dieren</h3>
+                <p>Ga naar de swipe pagina om meer schattige dieren te ontdekken die een thuis zoeken!</p>
+                <a href="swipe.php" class="button primary-button">Begin met swipen</a>
             </div>
             
         <?php else: ?>
             <!-- Niet ingelogde gebruiker interface -->
+            <div class="welcome-section">
+                <h2>Welkom bij Furever!</h2>
+                <p>Furever helpt jou bij het vinden van de perfecte huisdier-match. Maak kennis met verschillende dieren uit asielen en vind een maatje voor het leven!</p>
+            </div>
+            
             <div class="auth-container">
                 <div class="auth-box">
                     <h2>Registreren</h2>
@@ -234,7 +240,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </form>
                 </div>
             </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>Ontdek</h3>
+                    <p>Bekijk profielen van dieren die op zoek zijn naar een nieuw thuis.</p>
+                </div>
+                <div class="feature">
+                    <h3>Match</h3>
+                    <p>Like dieren die je leuk vindt en maak een match!</p>
+                </div>
+                <div class="feature">
+                    <h3>Contact</h3>
+                    <p>Neem contact op met het asiel en plan een ontmoeting.</p>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
+    
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Furever - Help huisdieren een thuis vinden.</p>
+    </footer>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <?php
+// filepath: c:\xampp\htdocs\Furever-project\classes\match.php
 require_once 'Gebruiker.php';
 require_once 'Dier.php';
 
@@ -72,9 +73,9 @@ class DierMatch { // Changed from Match to DierMatch
             
             $match->gebruiker = $gebruiker;
             
-            $asiel = new Asiel();
+            // Creëer een Asiel object en vul alleen de benodigde velden in
+            $asiel = new Asiel($row["asiel_naam"]); // Gebruik de constructor met naam
             $asiel->setId($row["asiel_id"]);
-            $asiel->setNaam($row["asiel_naam"]);
             
             $dier = new Dier();
             $dier->setId($row["dier_id"]);
