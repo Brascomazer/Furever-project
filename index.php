@@ -1,4 +1,5 @@
 <?php
+// filepath: c:\xampp\htdocs\Furever-project\index.php
 // Start de sessie zodat we gebruikersgegevens kunnen opslaan
 session_start();
 
@@ -103,27 +104,41 @@ if ($isIngelogd) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Furever - Vind je dierenmatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>Furever</h1>
-        <p>Vind jouw perfecte dierenmatch!</p>
-        <?php if ($isIngelogd): ?>
-        <nav>
-            <a href="index.php" class="active">Home</a>
-            <a href="swipe.php">Swipe</a>
-        </nav>
-        <?php endif; ?>
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo">Furever</div>
+                <div class="logo-tagline">Vind jouw perfecte match</div>
+            </div>
+
+            <?php if ($isIngelogd): ?>
+            <nav>
+                <a href="index.php" class="active">Home</a>
+                <a href="swipe.php">Swipe</a>
+            </nav>
+            <?php endif; ?>
+        </div>
     </header>
 
     <div class="container">
         <?php if (isset($melding)): ?>
-            <div class="message success"><?php echo $melding; ?></div>
+            <div class="message success">
+                <?php echo $melding; ?>
+                <span class="message-close" onclick="this.parentElement.style.display='none'">×</span>
+            </div>
         <?php endif; ?>
         
         <?php if (isset($foutmelding)): ?>
-            <div class="message error"><?php echo $foutmelding; ?></div>
+            <div class="message error">
+                <?php echo $foutmelding; ?>
+                <span class="message-close" onclick="this.parentElement.style.display='none'">×</span>
+            </div>
         <?php endif; ?>
         
         <?php if ($isIngelogd): ?>
@@ -132,10 +147,9 @@ if ($isIngelogd) {
                 <div class="profile-section">
                     <h2>Welkom, <?php echo $_SESSION['gebruiker_naam']; ?>!</h2>
                     
-                    <form method="post" action="" class="logout-form">
-                        <input type="hidden" name="actie" value="uitloggen">
-                        <button type="submit">Uitloggen</button>
-                    </form>
+                    <?php if (!empty($gebruiker->getProfiel()->getFoto())): ?>
+                        <img src="<?php echo htmlspecialchars($gebruiker->getProfiel()->getFoto()); ?>" alt="Profielfoto" class="profile-image">
+                    <?php endif; ?>
                     
                     <h3>Jouw Profiel</h3>
                     <form method="post" action="" class="profile-form">
@@ -148,7 +162,7 @@ if ($isIngelogd) {
                         
                         <div class="form-group">
                             <label for="foto">Profielfoto URL:</label>
-                            <input type="text" id="foto" name="foto" value="<?php echo htmlspecialchars($gebruiker->getProfiel()->getFoto()); ?>">
+                            <input type="text" id="foto" name="foto" value="<?php echo htmlspecialchars($gebruiker->getProfiel()->getFoto()); ?>" placeholder="https://voorbeeld.com/mijn-foto.jpg">
                         </div>
                         
                         <div class="form-group">
@@ -156,12 +170,18 @@ if ($isIngelogd) {
                             <textarea id="voorkeuren" name="voorkeuren" rows="4"><?php echo htmlspecialchars($gebruiker->getProfiel()->getVoorkeuren()); ?></textarea>
                         </div>
                         
-                        <button type="submit">Profiel Bijwerken</button>
+                        <button type="submit" class="btn btn-gradient">Profiel Bijwerken</button>
+                    </form>
+                    
+                    <form method="post" action="">
+                        <input type="hidden" name="actie" value="uitloggen">
+                        <button type="submit" class="logout-btn">Uitloggen</button>
                     </form>
                 </div>
                 
                 <div class="matches-section">
                     <h3>Jouw Matches</h3>
+                    
                     <?php if (count($matches) > 0): ?>
                         <div class="matches-container">
                         <?php foreach ($matches as $match): ?>
@@ -178,7 +198,9 @@ if ($isIngelogd) {
                         <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <p>Je hebt nog geen matches. Ga naar de <a href="swipe.php">swipe pagina</a> om dieren te ontdekken!</p>
+                        <div class="no-matches">
+                            <p>Je hebt nog geen matches. Ga naar de <a href="swipe.php">swipe pagina</a> om dieren te ontdekken!</p>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -186,17 +208,36 @@ if ($isIngelogd) {
             <div class="cta-card">
                 <h3>Ontdek Meer Dieren</h3>
                 <p>Ga naar de swipe pagina om meer schattige dieren te ontdekken die een thuis zoeken!</p>
-                <a href="swipe.php" class="button primary-button">Begin met swipen</a>
+                <a href="swipe.php" class="cta-btn">Begin met swipen</a>
             </div>
             
         <?php else: ?>
             <!-- Niet ingelogde gebruiker interface -->
             <div class="welcome-section">
-                <h2>Welkom bij Furever!</h2>
+                <h1>Welkom bij Furever!</h1>
                 <p>Furever helpt jou bij het vinden van de perfecte huisdier-match. Maak kennis met verschillende dieren uit asielen en vind een maatje voor het leven!</p>
+                <a href="#auth" class="btn btn-gradient btn-large">Start nu</a>
             </div>
             
-            <div class="auth-container">
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Ontdek</h3>
+                    <p>Bekijk profielen van dieren die op zoek zijn naar een nieuw thuis en leer ze kennen.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">❤️</div>
+                    <h3>Match</h3>
+                    <p>Like dieren die je leuk vindt en maak een match met jouw perfecte huisdier!</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💬</div>
+                    <h3>Contact</h3>
+                    <p>Neem contact op met het asiel en plan een ontmoeting met jouw match.</p>
+                </div>
+            </div>
+            
+            <div id="auth" class="auth-container">
                 <div class="auth-box">
                     <h2>Registreren</h2>
                     <form method="post" action="">
@@ -204,20 +245,20 @@ if ($isIngelogd) {
                         
                         <div class="form-group">
                             <label for="reg_naam">Naam:</label>
-                            <input type="text" id="reg_naam" name="naam" required>
+                            <input type="text" id="reg_naam" name="naam" required placeholder="Jouw naam">
                         </div>
                         
                         <div class="form-group">
                             <label for="reg_email">E-mail:</label>
-                            <input type="email" id="reg_email" name="email" required>
+                            <input type="email" id="reg_email" name="email" required placeholder="jouw@email.nl">
                         </div>
                         
                         <div class="form-group">
                             <label for="reg_wachtwoord">Wachtwoord:</label>
-                            <input type="password" id="reg_wachtwoord" name="wachtwoord" required>
+                            <input type="password" id="reg_wachtwoord" name="wachtwoord" required placeholder="Kies een veilig wachtwoord">
                         </div>
                         
-                        <button type="submit">Registreren</button>
+                        <button type="submit" class="btn btn-gradient">Registreren</button>
                     </form>
                 </div>
                 
@@ -228,38 +269,50 @@ if ($isIngelogd) {
                         
                         <div class="form-group">
                             <label for="login_email">E-mail:</label>
-                            <input type="email" id="login_email" name="email" required>
+                            <input type="email" id="login_email" name="email" required placeholder="jouw@email.nl">
                         </div>
                         
                         <div class="form-group">
                             <label for="login_wachtwoord">Wachtwoord:</label>
-                            <input type="password" id="login_wachtwoord" name="wachtwoord" required>
+                            <input type="password" id="login_wachtwoord" name="wachtwoord" required placeholder="Jouw wachtwoord">
                         </div>
                         
-                        <button type="submit">Inloggen</button>
+                        <button type="submit" class="btn btn-gradient">Inloggen</button>
                     </form>
-                </div>
-            </div>
-            
-            <div class="features">
-                <div class="feature">
-                    <h3>Ontdek</h3>
-                    <p>Bekijk profielen van dieren die op zoek zijn naar een nieuw thuis.</p>
-                </div>
-                <div class="feature">
-                    <h3>Match</h3>
-                    <p>Like dieren die je leuk vindt en maak een match!</p>
-                </div>
-                <div class="feature">
-                    <h3>Contact</h3>
-                    <p>Neem contact op met het asiel en plan een ontmoeting.</p>
                 </div>
             </div>
         <?php endif; ?>
     </div>
     
     <footer>
-        <p>&copy; <?php echo date("Y"); ?> Furever - Help huisdieren een thuis vinden.</p>
+        <div class="footer-container">
+            <div>
+                <div class="footer-logo">Furever</div>
+                <p class="footer-desc">Help huisdieren een thuis vinden en vind jouw perfecte match.</p>
+            </div>
+            
+            <div>
+                <h4 class="footer-heading">Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.php">Home</a></li>
+                    <?php if ($isIngelogd): ?>
+                        <li><a href="swipe.php">Swipe</a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="footer-heading">Contact</h4>
+                <ul class="footer-links">
+                    <li>Email: info@furever.nl</li>
+                    <li>Tel: 020 123 4567</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p class="footer-copyright">&copy; <?php echo date("Y"); ?> Furever - Alle rechten voorbehouden</p>
+        </div>
     </footer>
 </body>
 </html>
